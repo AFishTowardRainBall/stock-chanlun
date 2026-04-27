@@ -25,14 +25,14 @@ class LLMClient:
             raise ValueError("DEEPSEEK_API_KEY 未设置，请检查 .env 文件")
 
         body = {
-            "model": kwargs.get("model", "deepseek-chat"),
+            "model": kwargs.get("model", "deepseek-v3.2"),
             "messages": messages,
             "temperature": kwargs.get("temperature", 0.3),
             "max_tokens": kwargs.get("max_tokens", 1024),
         }
         with httpx.Client(timeout=60.0) as client:
             resp = client.post(
-                "https://api.deepseek.com/v1/chat/completions",
+                "https://qianfan.baidubce.com/v2/coding/chat/completions",
                 headers={
                     "Authorization": f"Bearer {key}",
                     "Content-Type": "application/json",
