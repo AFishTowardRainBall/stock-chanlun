@@ -604,6 +604,46 @@ function onResize() {
   queueChanlunGraphic()
 }
 
+function focusSignal(datetime: string, price?: number) {
+  if (!chart || !lastDates.length) return
+  const idx = dateToIdxRobust(datetime, lastDates)
+  if (idx < 0) return
+
+  const start = Math.max(0, idx - 30)
+  const end = Math.min(lastDates.length - 1, idx + 30)
+  const startPct = lastDates.length > 1 ? (start / (lastDates.length - 1)) * 100 : 0
+  const endPct = lastDates.length > 1 ? (end / (lastDates.length - 1)) * 100 : 100
+
+  chart.dispatchAction({
+    type: 'dataZoom',
+    start: startPct,
+    end: endPct,
+  })
+
+  chart.dispatchAction({
+    type: 'showTip',
+    seriesIndex: 0,
+    dataIndex: idx,
+  })
+
+  if (price != null && Number.isFinite(price)) {
+    const pt = pixelAtIdx(idx, price)
+    if (pt) {
+      chart.dispatchAction({
+        type: 'updateAxisPointer',
+        x: pt[0],
+        y: pt[1],
+      } as any)
+    }
+  }
+
+  setBarInfoByIndex(idx)
+}
+
+defineExpose({
+  focusSignal,
+})
+
 onMounted(() => {
   initChart()
   window.addEventListener('resize', onResize)
