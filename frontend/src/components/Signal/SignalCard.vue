@@ -8,20 +8,15 @@
       </div>
     </div>
 
-    <!-- 信号统计摘要 -->
-    <div v-if="signals.length > 0" class="signal-summary">
-      <div class="summary-item buy-summary">
-        <span class="summary-count">{{ buyCount }}</span>
-        <span class="summary-label">买入信号</span>
-      </div>
-      <div class="summary-divider" />
-      <div class="summary-item sell-summary">
-        <span class="summary-count">{{ sellCount }}</span>
-        <span class="summary-label">卖出信号</span>
-      </div>
+    <!-- 加载中 -->
+    <div v-if="loading" class="loading-state">
+      <div class="skeleton skeleton-summary" />
+      <div class="skeleton skeleton-item" />
+      <div class="skeleton skeleton-item" />
     </div>
 
-    <div v-if="signals.length === 0" class="empty-signals">
+    <!-- 空状态 -->
+    <div v-else-if="signals.length === 0" class="empty-signals">
       <svg class="empty-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="3" y="3" width="18" height="18" rx="2"/>
         <path d="M3 9h18M9 21V9"/>
@@ -30,7 +25,22 @@
       <p class="empty-hint">当前级别尚未形成有效背驰或买卖点</p>
     </div>
 
-    <div v-else class="signal-list">
+    <!-- 有信号 -->
+    <template v-else>
+      <!-- 信号统计摘要 -->
+      <div class="signal-summary">
+        <div class="summary-item buy-summary">
+          <span class="summary-count">{{ buyCount }}</span>
+          <span class="summary-label">买入信号</span>
+        </div>
+        <div class="summary-divider" />
+        <div class="summary-item sell-summary">
+          <span class="summary-count">{{ sellCount }}</span>
+          <span class="summary-label">卖出信号</span>
+        </div>
+      </div>
+
+      <div class="signal-list">
       <div
         v-for="(sig, idx) in visibleSignals"
         :key="`${sig.datetime}-${sig.type}-${idx}`"
@@ -70,7 +80,8 @@
       >
         查看全部 ({{ signals.length }})
       </button>
-    </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -78,7 +89,7 @@
 import { ref, computed } from 'vue'
 import type { Signal } from '../../api/stock'
 
-const props = defineProps<{ signals: Signal[]; updatedAt?: string | null }>()
+const props = defineProps<{ signals: Signal[]; loading?: boolean; updatedAt?: string | null }>()
 
 const visibleCount = ref(5)
 
@@ -250,4 +261,32 @@ function formatDate(d: string) {
   transition: background 0.15s;
 }
 .show-more:hover { background: var(--bg-hover); }
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-hover) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+.skeleton-summary {
+  height: 48px;
+}
+
+.skeleton-item {
+  height: 72px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 </style>

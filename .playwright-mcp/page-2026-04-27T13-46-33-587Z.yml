@@ -1,0 +1,47 @@
+- generic [ref=e4]:
+  - navigation [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - link "ChanStock" [ref=e8] [cursor=pointer]:
+          - /url: /stock-chanlun/
+        - generic [ref=e9]:
+          - link "首页" [ref=e10] [cursor=pointer]:
+            - /url: /stock-chanlun/
+          - link "选股" [ref=e11] [cursor=pointer]:
+            - /url: /stock-chanlun/screen
+          - link "自选股" [ref=e12] [cursor=pointer]:
+            - /url: /stock-chanlun/watchlist
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: 待分析
+          - generic "缠论信号状态" [ref=e16]:
+            - generic "暂无信号" [ref=e17]
+            - generic "暂无信号" [ref=e18]
+            - generic "暂无信号" [ref=e19]
+        - generic [ref=e20]:
+          - button "1分" [ref=e21] [cursor=pointer]
+          - button "5分" [ref=e22] [cursor=pointer]
+          - button "15分" [ref=e23] [cursor=pointer]
+          - button "30分" [ref=e24] [cursor=pointer]
+          - button "60分" [ref=e25] [cursor=pointer]
+          - button "日线" [ref=e26] [cursor=pointer]
+          - button "周线" [ref=e27] [cursor=pointer]
+          - button "月线" [ref=e28] [cursor=pointer]
+        - generic [ref=e29]:
+          - button "行情详情与缠论信号 (Q)" [ref=e31] [cursor=pointer]:
+            - img [ref=e32]
+          - button "盘口・资料・新闻 (I)" [ref=e37] [cursor=pointer]:
+            - img [ref=e38]
+          - generic [ref=e42]:
+            - button "缠师 AI 与笔记 (A)" [ref=e43] [cursor=pointer]:
+              - img [ref=e44]
+            - generic [ref=e48]:
+              - generic [ref=e49]: 缠师在这里，按 A 可随时呼出
+              - button "知道了" [ref=e50] [cursor=pointer]
+        - generic [ref=e51]:
+          - button "DS" [ref=e52] [cursor=pointer]
+          - button "GM" [ref=e53] [cursor=pointer]
+        - button "加载中..." [disabled] [ref=e54] [cursor=pointer]
+        - button "+自选" [disabled] [ref=e55] [cursor=pointer]:
+          - generic [ref=e56]: +自选
+  - generic [ref=e59]: 加载 K 线数据...

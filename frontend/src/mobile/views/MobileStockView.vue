@@ -53,7 +53,17 @@
         <button class="btn btn-ghost btn-sm" @click="showSheet = true">详情</button>
       </div>
 
-      <div v-if="store.chanlunResult?.signals?.length" class="signals-preview">
+      <div v-if="store.loadingChanlun" class="signals-preview signals-loading">
+        <div class="sp-head">
+          <span class="sp-title">缠论信号</span>
+        </div>
+        <div class="sp-skeletons">
+          <div class="skeleton skeleton-item" />
+          <div class="skeleton skeleton-item" />
+        </div>
+      </div>
+
+      <div v-else-if="store.chanlunResult?.signals?.length" class="signals-preview">
         <div class="sp-head">
           <span class="sp-title">缠论信号</span>
           <span class="sp-count">{{ store.chanlunResult.signals.length }} 个</span>
@@ -136,7 +146,7 @@ function onZoomChange(s: number, e: number) {
 
 const stockCode = computed(() => route.params.code as string)
 const currentLevel = computed(() => store.currentLevel)
-const loadingAny = computed(() => store.loadingKline || store.loadingChanlun || store.loadingAI)
+const loadingAny = computed(() => store.loadingKline && !store.klines.length)
 const error = computed(() =>
   store.errorKline || store.errorChanlun || store.errorAI
 )
@@ -423,5 +433,29 @@ watch(() => route.params.code, () => { signalsExpanded.value = false; loadData()
   flex-direction: column;
   align-items: center;
   gap: 16px;
+}
+
+/* 加载状态 */
+.signals-loading .sp-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-hover) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+.skeleton-item {
+  height: 48px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 </style>

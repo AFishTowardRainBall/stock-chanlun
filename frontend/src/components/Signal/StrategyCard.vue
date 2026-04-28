@@ -8,7 +8,12 @@
       </div>
     </div>
 
-    <div v-if="!signal" class="empty-strategy">
+    <div v-if="loading" class="empty-strategy">
+      <div class="skeleton" style="height: 100px; border-radius: 8px;" />
+      <span class="loading-text">AI 分析中...</span>
+    </div>
+
+    <div v-else-if="!signal" class="empty-strategy">
       <div class="skeleton" style="height: 100px; border-radius: 8px;" />
     </div>
 
@@ -88,7 +93,7 @@
 import { computed } from 'vue'
 import type { AISignal } from '../../api/stock'
 
-const props = defineProps<{ signal: AISignal | null; updatedAt?: string | null }>()
+const props = defineProps<{ signal: AISignal | null; loading?: boolean; updatedAt?: string | null }>()
 
 const dirClass = computed(() => {
   if (!props.signal) return ''
@@ -134,7 +139,23 @@ function confColor(c: number) {
 .risk-mid { background: rgba(210,153,34,0.15); color: var(--accent-amber); }
 .risk-high { background: rgba(248,81,73,0.15); color: var(--accent-red); }
 
-.empty-strategy { padding: 8px 0; }
+.empty-strategy { padding: 8px 0; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+
+.loading-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-hover) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 .strategy-content { display: flex; flex-direction: column; gap: 12px; }
 
