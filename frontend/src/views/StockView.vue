@@ -3,7 +3,6 @@
     <nav class="nav">
       <div class="nav-inner nav-inner--stock">
         <div class="nav-left">
-          <router-link to="/" class="nav-brand">ChanStock</router-link>
           <div class="nav-links">
             <router-link to="/" class="nav-link">首页</router-link>
             <router-link to="/screen" class="nav-link">选股</router-link>
@@ -11,18 +10,20 @@
           </div>
         </div>
 
-        <div v-if="headerQuote" class="stock-topline">
+        <div class="stock-topline" :class="{ 'stock-topline--ready': !!headerQuote }">
           <div class="stock-topline-main">
-            <span class="stock-code mono">{{ stockCode }}</span>
-            <span class="stock-name">{{ headerQuote.name || stockCode }}</span>
-            <span class="stock-price mono">{{ headerQuote.price.toFixed(2) }}</span>
-            <span class="stock-change mono" :class="changeClass">{{ changeAmountText }} {{ changeText }}</span>
+            <span class="stock-code mono">{{ headerQuote ? stockCode : '--' }}</span>
+            <span class="stock-name">{{ headerQuote?.name || '加载中' }}</span>
+            <span class="stock-price mono">{{ headerQuote?.price != null ? headerQuote.price.toFixed(2) : '--.--' }}</span>
+            <span class="stock-change mono" :class="headerQuote ? changeClass : 'stock-change--placeholder'">
+              {{ headerQuote ? `${changeAmountText} ${changeText}` : '--.-- --.--%' }}
+            </span>
           </div>
           <div class="stock-topline-stats">
-            <span class="top-stat"><b>开</b>{{ statPrice(headerQuote.open) }}</span>
-            <span class="top-stat"><b>高</b><span class="price-up">{{ statPrice(headerQuote.high) }}</span></span>
-            <span class="top-stat"><b>低</b><span class="price-down">{{ statPrice(headerQuote.low) }}</span></span>
-            <span class="top-stat"><b>量</b>{{ formatVolume(headerQuote.volume) }}</span>
+            <span class="top-stat"><b>开</b>{{ headerQuote ? statPrice(headerQuote.open) : '--.--' }}</span>
+            <span class="top-stat"><b>高</b><span :class="headerQuote ? 'price-up' : 'stock-change--placeholder'">{{ headerQuote ? statPrice(headerQuote.high) : '--.--' }}</span></span>
+            <span class="top-stat"><b>低</b><span :class="headerQuote ? 'price-down' : 'stock-change--placeholder'">{{ headerQuote ? statPrice(headerQuote.low) : '--.--' }}</span></span>
+            <span class="top-stat"><b>量</b>{{ headerQuote ? formatVolume(headerQuote.volume) : '--' }}</span>
           </div>
         </div>
 
@@ -826,9 +827,7 @@ const headerQuote = computed((): Quote | null => {
 const levels = [
   { value: '1min' as LevelOption, label: '1分' },
   { value: '5min' as LevelOption, label: '5分' },
-  { value: '15min' as LevelOption, label: '15分' },
   { value: '30min' as LevelOption, label: '30分' },
-  { value: '60min' as LevelOption, label: '60分' },
   { value: 'daily' as LevelOption, label: '日线' },
   { value: 'weekly' as LevelOption, label: '周线' },
   { value: 'monthly' as LevelOption, label: '月线' },
@@ -1170,31 +1169,46 @@ watch(() => route.params.code, () => {
 }
 
 .nav-inner--stock {
+  display: flex;
+  align-items: center;
   gap: 16px;
+  min-width: 0;
+  min-height: 58px;
+  height: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .nav-left {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
   min-width: 0;
+  flex: 0 0 auto;
 }
 
 .stock-topline {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
   min-width: 0;
-  padding-left: 6px;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  flex: 1 1 360px;
+  opacity: 0.72;
+  transition: opacity 0.16s ease;
+}
+
+.stock-topline--ready {
+  opacity: 1;
 }
 
 .stock-topline-main {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
-  white-space: nowrap;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
 }
 
 .stock-code {
@@ -1203,32 +1217,39 @@ watch(() => route.params.code, () => {
 }
 
 .stock-name {
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .stock-price {
-  font-size: 1.35rem;
+  font-size: 1.18rem;
   font-weight: 800;
   color: var(--text-primary);
 }
 
 .stock-change {
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 700;
+}
+
+.stock-change--placeholder {
+  color: var(--text-muted);
 }
 
 .stock-topline-stats {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
+  justify-content: flex-end;
+  flex: 0 1 auto;
 }
 
 .top-stat {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .top-stat b {
@@ -1240,10 +1261,11 @@ watch(() => route.params.code, () => {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-left: auto;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-wrap: nowrap;
   justify-content: flex-end;
+  margin-left: auto;
+  flex: 0 1 auto;
 }
 
 .trend-capsule {
@@ -2144,16 +2166,13 @@ watch(() => route.params.code, () => {
 
 @media (max-width: 1680px) {
   .nav-inner--stock {
-    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
   }
 
-  .stock-topline {
-    order: 3;
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-left: 0;
-    padding-top: 10px;
+  .nav-actions {
+    margin-left: auto;
+    flex-wrap: wrap;
   }
 }
 
@@ -2176,6 +2195,29 @@ watch(() => route.params.code, () => {
 
   .drawer-panel--overlay {
     width: min(400px, calc(100vw - 40px));
+  }
+
+  .nav-inner--stock {
+    align-items: flex-start;
+  }
+
+  .stock-topline {
+    order: 3;
+    width: 100%;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .stock-topline-stats {
+    justify-content: flex-start;
+  }
+
+  .nav-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
   }
 }
 
