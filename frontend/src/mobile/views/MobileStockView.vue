@@ -154,12 +154,12 @@ const error = computed(() =>
 const levels = [
   { value: '1min' as LevelOption, label: '1分' },
   { value: '5min' as LevelOption, label: '5分' },
-  { value: '15min' as LevelOption, label: '15分' },
+  // { value: '15min' as LevelOption, label: '15分' },
   { value: '30min' as LevelOption, label: '30分' },
-  { value: '60min' as LevelOption, label: '60分' },
+  // { value: '60min' as LevelOption, label: '60分' },
   { value: 'daily' as LevelOption, label: '日线' },
   { value: 'weekly' as LevelOption, label: '周线' },
-  { value: 'monthly' as LevelOption, label: '月线' },
+  // { value: 'monthly' as LevelOption, label: '月线' },
 ]
 
 function _num(v: unknown): number | null {

@@ -51,64 +51,7 @@
             >{{ lv.label }}</button>
           </div>
 
-          <div class="drawer-trigger-group">
-            <div class="drawer-trigger-wrap">
-              <button
-                class="drawer-trigger"
-                :class="{ active: isDrawerVisible('quote') }"
-                title="行情详情与缠论信号 (Q)"
-                @click="toggleDrawer('quote')"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <rect x="3" y="4" width="4" height="16" rx="1" />
-                  <rect x="10" y="8" width="4" height="12" rx="1" />
-                  <rect x="17" y="2" width="4" height="18" rx="1" />
-                </svg>
-              </button>
-              <span v-if="drawerAlertMap.quote" class="trigger-dot" />
-            </div>
-
-            <div class="drawer-trigger-wrap">
-              <button
-                class="drawer-trigger"
-                :class="{ active: isDrawerVisible('info') }"
-                title="盘口・资料・新闻 (I)"
-                @click="toggleDrawer('info')"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <line x1="8" y1="6" x2="21" y2="6" />
-                  <line x1="8" y1="12" x2="21" y2="12" />
-                  <line x1="8" y1="18" x2="21" y2="18" />
-                  <circle cx="4" cy="6" r="1.5" />
-                  <circle cx="4" cy="12" r="1.5" />
-                  <circle cx="4" cy="18" r="1.5" />
-                </svg>
-              </button>
-              <span v-if="drawerAlertMap.info" class="trigger-dot" />
-            </div>
-
-            <div class="drawer-trigger-wrap">
-              <button
-                class="drawer-trigger"
-                :class="{ active: isDrawerVisible('ai') }"
-                title="缠师 AI 与笔记 (A)"
-                @click="toggleDrawer('ai')"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
-                  <circle cx="8.5" cy="14.5" r="1.5" />
-                  <circle cx="15.5" cy="14.5" r="1.5" />
-                </svg>
-              </button>
-              <span v-if="drawerAlertMap.ai" class="trigger-dot" />
-              <div v-if="showAiGuideTip" class="guide-bubble">
-                <span>缠师在这里，按 A 可随时呼出</span>
-                <button class="guide-close" @click.stop="dismissAiGuide">知道了</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="ai-model-switch">
+          <!-- <div class="ai-model-switch">
             <button
               class="model-btn"
               :class="{ active: store.aiModel === 'deepseek' }"
@@ -121,7 +64,7 @@
               @click="switchModel('gemini')"
               title="Gemini"
             >GM</button>
-          </div>
+          </div> -->
           <button class="btn btn-ghost" @click="loadData" :disabled="loadingAny">
             {{ loadingAny ? '加载中...' : '刷新' }}
           </button>
@@ -164,7 +107,7 @@
 
     <div v-else class="workspace">
       <div class="workspace-main">
-        <div class="chart-shell" @click="handleChartShellClick">
+        <div class="chart-shell">
           <div class="chart-header card">
             <div class="chart-header-left">
               <div class="date-filter" :class="{ 'has-filter': startDate || endDate }">
@@ -229,226 +172,70 @@
             <SKDJChart v-if="store.indicators.skdj" :klines="store.klines" :zoom-start="zoomStart" :zoom-end="zoomEnd" class="sub-chart" />
           </div>
 
-          <Transition name="drawer-overlay">
-            <aside
-              v-if="activeOverlayDrawer"
-              class="drawer-panel drawer-panel--overlay"
-              @click.stop
-            >
-              <div class="drawer-head">
-                <div>
-                  <h3 class="drawer-title">{{ drawerMeta[activeOverlayDrawer].title }}</h3>
-                  <p class="drawer-subtitle">{{ drawerMeta[activeOverlayDrawer].subtitle }}</p>
-                </div>
-                <div class="drawer-head-actions">
-                  <button class="drawer-icon-btn" :title="isPinned(activeOverlayDrawer) ? '取消钉住' : '钉住面板'" @click="togglePin(activeOverlayDrawer)">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                      <path d="M12 17v5" />
-                      <path d="M5 5l14 14" />
-                      <path d="M9 3l12 12-3 3-12-12z" />
-                    </svg>
-                  </button>
-                  <button class="drawer-icon-btn" title="关闭" @click="closeDrawer(activeOverlayDrawer)">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <div v-if="activeOverlayDrawer === 'quote'" class="drawer-body">
-                <section class="drawer-hero drawer-hero--quote">
-                  <div class="hero-price-line">
-                    <span class="hero-price mono">{{ headerQuote?.price != null ? headerQuote.price.toFixed(2) : '—' }}</span>
-                    <span class="hero-change mono" :class="changeClass">{{ changeAmountText }} {{ changeText }}</span>
-                  </div>
-                  <div class="hero-code-line">
-                    <span>{{ headerQuote?.name || stockCode }}</span>
-                    <span class="mono">{{ stockCode }}</span>
-                  </div>
-                </section>
-
-                <section class="drawer-card">
-                  <div class="drawer-card-title">OHLC</div>
-                  <div class="quote-grid">
-                    <div v-for="item in quotePrimaryRows" :key="item.label" class="quote-grid-item">
-                      <span class="quote-label">{{ item.label }}</span>
-                      <span class="quote-value mono" :class="item.valueClass">{{ item.value }}</span>
-                    </div>
-                  </div>
-                </section>
-
-                <section class="drawer-card">
-                  <div class="drawer-card-title">成交与估值</div>
-                  <div class="quote-grid">
-                    <div v-for="item in quoteSecondaryRows" :key="item.label" class="quote-grid-item">
-                      <span class="quote-label">{{ item.label }}</span>
-                      <span class="quote-value mono" :class="item.valueClass">{{ item.value }}</span>
-                    </div>
-                  </div>
-                </section>
-
-                <section class="drawer-card">
-                  <div class="drawer-card-title">分析级别</div>
-                  <div class="level-tabs drawer-level-tabs">
-                    <button
-                      v-for="lv in levels"
-                      :key="`drawer-${lv.value}`"
-                      class="level-tab"
-                      :class="{ active: currentLevel === lv.value }"
-                      @click="changeLevel(lv.value)"
-                    >{{ lv.label }}</button>
-                  </div>
-                </section>
-
-                <section class="drawer-card">
-                  <div class="drawer-card-title">走势判断</div>
-                  <div class="drawer-trend">
-                    <span class="trend-pill" :class="trendClass">{{ store.chanlunResult?.trend || '—' }}</span>
-                    <p class="drawer-paragraph">{{ store.chanlunResult?.summary || '暂无走势判断。' }}</p>
-                  </div>
-                </section>
-
-                <section class="drawer-card">
-                  <div class="drawer-card-title">缠论信号历史</div>
-                  <div v-if="sortedSignals.length" class="signal-timeline">
-                    <button
-                      v-for="(sig, idx) in sortedSignals.slice(0, 10)"
-                      :key="`${sig.datetime}-${sig.type}-${idx}`"
-                      class="signal-timeline-item"
-                      :class="signalToneClass(sig.type)"
-                      @click="focusSignal(sig)"
-                    >
-                      <div class="signal-timeline-top">
-                        <span class="signal-type">{{ sig.type }}</span>
-                        <span class="signal-level mono">{{ sig.level }}</span>
-                      </div>
-                      <div class="signal-timeline-mid">
-                        <span class="mono">{{ sig.price.toFixed(2) }}</span>
-                        <span>{{ formatSignalTime(sig.datetime) }}</span>
-                      </div>
-                      <p class="signal-timeline-desc">{{ sig.description }}</p>
-                    </button>
-                  </div>
-                  <div v-else class="drawer-empty">当前级别尚未形成有效背驰或买卖点。</div>
-                </section>
-              </div>
-
-              <div v-else-if="activeOverlayDrawer === 'info'" class="drawer-body">
-                <div class="drawer-tabs">
-                  <button class="drawer-tab" :class="{ active: drawerState.tabs.info === 'depth' }" @click="setInfoTab('depth')">盘口</button>
-                  <button class="drawer-tab" :class="{ active: drawerState.tabs.info === 'profile' }" @click="setInfoTab('profile')">资料</button>
-                  <button class="drawer-tab" :class="{ active: drawerState.tabs.info === 'news' }" @click="setInfoTab('news')">新闻</button>
-                </div>
-
-                <section v-if="drawerState.tabs.info === 'depth'" class="drawer-card">
-                  <div class="drawer-card-title">五档盘口</div>
-                  <div v-if="hasDepth" class="depth-wrap">
-                    <div class="depth-head">
-                      <span />
-                      <span class="dh-p">价格</span>
-                      <span class="dh-v">量</span>
-                    </div>
-                    <div v-for="(row, i) in depthAsks" :key="`oa-${i}`" class="depth-row depth-sell">
-                      <span class="depth-lab">卖{{ 5 - i }}</span>
-                      <span class="mono depth-price">{{ fmtDepthPrice(row.price) }}</span>
-                      <span class="mono depth-vol">{{ fmtDepthVol(row.volume) }}</span>
-                    </div>
-                    <div class="depth-divider" />
-                    <div v-for="(row, i) in depthBids" :key="`ob-${i}`" class="depth-row depth-buy">
-                      <span class="depth-lab">买{{ i + 1 }}</span>
-                      <span class="mono depth-price">{{ fmtDepthPrice(row.price) }}</span>
-                      <span class="mono depth-vol">{{ fmtDepthVol(row.volume) }}</span>
-                    </div>
-                  </div>
-                  <div v-else class="drawer-empty">暂无盘口数据</div>
-                </section>
-
-                <section v-else-if="drawerState.tabs.info === 'profile'" class="drawer-card">
-                  <div class="drawer-card-title">基本资料</div>
-                  <div class="profile-section">
-                    <div class="sector-chip">{{ extras?.boards?.industry || '行业待补充' }}</div>
-                    <div class="quote-grid">
-                      <div v-for="item in companyProfileRows" :key="item.label" class="quote-grid-item">
-                        <span class="quote-label">{{ item.label }}</span>
-                        <span class="quote-value mono" :class="item.valueClass">{{ item.value }}</span>
-                      </div>
-                    </div>
-                    <div v-if="boardHighlightRows.length" class="board-highlights">
-                      <div v-for="(row, idx) in boardHighlightRows" :key="`profile-${idx}`" class="board-highlight">
-                        <span class="quote-label">{{ row.label }}</span>
-                        <span class="quote-value mono">{{ row.value }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                <section v-else class="drawer-card drawer-card--stretch">
-                  <div class="drawer-card-title">公司新闻</div>
-                  <div v-if="extras?.news?.length" class="news-list">
-                    <a
-                      v-for="(item, idx) in extras.news"
-                      :key="`news-${idx}`"
-                      class="news-item"
-                      :href="item.url"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span class="news-title">{{ item.title }}</span>
-                      <span class="news-meta">
-                        <span v-if="item.source">{{ item.source }}</span>
-                        <span v-if="item.time">{{ item.time }}</span>
-                      </span>
-                    </a>
-                  </div>
-                  <div v-else class="drawer-empty">暂无相关新闻</div>
-                </section>
-              </div>
-
-              <div v-else class="drawer-body">
-                <div class="drawer-tabs">
-                  <button class="drawer-tab" :class="{ active: drawerState.tabs.ai === 'chat' }" @click="setAiTab('chat')">缠师对话</button>
-                  <button class="drawer-tab" :class="{ active: drawerState.tabs.ai === 'notes' }" @click="setAiTab('notes')">我的笔记</button>
-                  <button class="drawer-tab" :class="{ active: drawerState.tabs.ai === 'strategy' }" @click="setAiTab('strategy')">策略建议</button>
-                </div>
-                <AIChat v-if="drawerState.tabs.ai === 'chat'" :stock-code="stockCode" />
-                <CommentSection v-else-if="drawerState.tabs.ai === 'notes'" :stock-code="stockCode" />
-                <StrategyCard v-else :signal="store.aiSignal" :loading="store.loadingAI" :updated-at="store.aiUpdatedAt" />
-              </div>
-            </aside>
-          </Transition>
         </div>
 
-        <div v-if="pinnedDrawerKeys.length" class="drawer-dock">
+        <Transition name="drawer-slide">
           <aside
-            v-for="drawerKey in pinnedDrawerKeys"
-            :key="`pinned-${drawerKey}`"
-            class="drawer-panel drawer-panel--pinned"
+            v-if="drawerState.active"
+            class="drawer-dock"
           >
-            <div class="drawer-head">
-              <div>
-                <h3 class="drawer-title">{{ drawerMeta[drawerKey].title }}</h3>
-                <p class="drawer-subtitle">{{ drawerMeta[drawerKey].subtitle }}</p>
-              </div>
-              <div class="drawer-head-actions">
-                <button class="drawer-icon-btn drawer-icon-btn--active" title="取消钉住" @click="togglePin(drawerKey)">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M12 17v5" />
-                    <path d="M5 5l14 14" />
-                    <path d="M9 3l12 12-3 3-12-12z" />
-                  </svg>
-                </button>
-                <button class="drawer-icon-btn" title="关闭" @click="closeDrawer(drawerKey)">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              </div>
+            <!-- Switch 选项卡栏 -->
+            <div class="drawer-switch">
+              <button
+                class="drawer-switch-btn"
+                :class="{ active: drawerState.active === 'quote' }"
+                title="行情详情与缠论信号 (Q)"
+                @click="toggleDrawer('quote')"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3" y="4" width="4" height="16" rx="1" />
+                  <rect x="10" y="8" width="4" height="12" rx="1" />
+                  <rect x="17" y="2" width="4" height="18" rx="1" />
+                </svg>
+                <span>行情</span>
+                <span v-if="drawerAlertMap.quote && drawerState.active !== 'quote'" class="switch-dot" />
+              </button>
+              <button
+                class="drawer-switch-btn"
+                :class="{ active: drawerState.active === 'info' }"
+                title="盘口・资料・新闻 (I)"
+                @click="toggleDrawer('info')"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <line x1="8" y1="6" x2="21" y2="6" />
+                  <line x1="8" y1="12" x2="21" y2="12" />
+                  <line x1="8" y1="18" x2="21" y2="18" />
+                  <circle cx="4" cy="6" r="1.5" />
+                  <circle cx="4" cy="12" r="1.5" />
+                  <circle cx="4" cy="18" r="1.5" />
+                </svg>
+                <span>盘口资讯</span>
+                <span v-if="drawerAlertMap.info && drawerState.active !== 'info'" class="switch-dot" />
+              </button>
+              <button
+                class="drawer-switch-btn"
+                :class="{ active: drawerState.active === 'ai' }"
+                title="缠师 AI 与笔记 (A)"
+                @click="toggleDrawer('ai')"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
+                  <circle cx="8.5" cy="14.5" r="1.5" />
+                  <circle cx="15.5" cy="14.5" r="1.5" />
+                </svg>
+                <span>AI诊股</span>
+                <span v-if="drawerAlertMap.ai && drawerState.active !== 'ai'" class="switch-dot" />
+              </button>
+              <button class="drawer-close-btn" title="关闭 (Esc)" @click="toggleDrawer(drawerState.active)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
             </div>
 
-            <div v-if="drawerKey === 'quote'" class="drawer-body">
+            <!-- Quote 面板 -->
+            <div v-if="drawerState.active === 'quote'" class="drawer-body">
               <section class="drawer-hero drawer-hero--quote">
                 <div class="hero-price-line">
                   <span class="hero-price mono">{{ headerQuote?.price != null ? headerQuote.price.toFixed(2) : '—' }}</span>
@@ -463,7 +250,7 @@
               <section class="drawer-card">
                 <div class="drawer-card-title">OHLC</div>
                 <div class="quote-grid">
-                  <div v-for="item in quotePrimaryRows" :key="`p-${item.label}`" class="quote-grid-item">
+                  <div v-for="item in quotePrimaryRows" :key="item.label" class="quote-grid-item">
                     <span class="quote-label">{{ item.label }}</span>
                     <span class="quote-value mono" :class="item.valueClass">{{ item.value }}</span>
                   </div>
@@ -473,7 +260,7 @@
               <section class="drawer-card">
                 <div class="drawer-card-title">成交与估值</div>
                 <div class="quote-grid">
-                  <div v-for="item in quoteSecondaryRows" :key="`s-${item.label}`" class="quote-grid-item">
+                  <div v-for="item in quoteSecondaryRows" :key="item.label" class="quote-grid-item">
                     <span class="quote-label">{{ item.label }}</span>
                     <span class="quote-value mono" :class="item.valueClass">{{ item.value }}</span>
                   </div>
@@ -485,7 +272,7 @@
                 <div class="level-tabs drawer-level-tabs">
                   <button
                     v-for="lv in levels"
-                    :key="`pin-drawer-${lv.value}`"
+                    :key="`dr-${lv.value}`"
                     class="level-tab"
                     :class="{ active: currentLevel === lv.value }"
                     @click="changeLevel(lv.value)"
@@ -506,7 +293,7 @@
                 <div v-if="sortedSignals.length" class="signal-timeline">
                   <button
                     v-for="(sig, idx) in sortedSignals.slice(0, 10)"
-                    :key="`pin-s-${sig.datetime}-${sig.type}-${idx}`"
+                    :key="`s-${sig.datetime}-${sig.type}-${idx}`"
                     class="signal-timeline-item"
                     :class="signalToneClass(sig.type)"
                     @click="focusSignal(sig)"
@@ -526,7 +313,8 @@
               </section>
             </div>
 
-            <div v-else-if="drawerKey === 'info'" class="drawer-body">
+            <!-- Info 面板 -->
+            <div v-else-if="drawerState.active === 'info'" class="drawer-body">
               <div class="drawer-tabs">
                 <button class="drawer-tab" :class="{ active: drawerState.tabs.info === 'depth' }" @click="setInfoTab('depth')">盘口</button>
                 <button class="drawer-tab" :class="{ active: drawerState.tabs.info === 'profile' }" @click="setInfoTab('profile')">资料</button>
@@ -541,13 +329,13 @@
                     <span class="dh-p">价格</span>
                     <span class="dh-v">量</span>
                   </div>
-                  <div v-for="(row, i) in depthAsks" :key="`pa-${i}`" class="depth-row depth-sell">
+                  <div v-for="(row, i) in depthAsks" :key="`da-${i}`" class="depth-row depth-sell">
                     <span class="depth-lab">卖{{ 5 - i }}</span>
                     <span class="mono depth-price">{{ fmtDepthPrice(row.price) }}</span>
                     <span class="mono depth-vol">{{ fmtDepthVol(row.volume) }}</span>
                   </div>
                   <div class="depth-divider" />
-                  <div v-for="(row, i) in depthBids" :key="`pb-${i}`" class="depth-row depth-buy">
+                  <div v-for="(row, i) in depthBids" :key="`db-${i}`" class="depth-row depth-buy">
                     <span class="depth-lab">买{{ i + 1 }}</span>
                     <span class="mono depth-price">{{ fmtDepthPrice(row.price) }}</span>
                     <span class="mono depth-vol">{{ fmtDepthVol(row.volume) }}</span>
@@ -561,13 +349,13 @@
                 <div class="profile-section">
                   <div class="sector-chip">{{ extras?.boards?.industry || '行业待补充' }}</div>
                   <div class="quote-grid">
-                    <div v-for="item in companyProfileRows" :key="`pc-${item.label}`" class="quote-grid-item">
+                    <div v-for="item in companyProfileRows" :key="item.label" class="quote-grid-item">
                       <span class="quote-label">{{ item.label }}</span>
                       <span class="quote-value mono" :class="item.valueClass">{{ item.value }}</span>
                     </div>
                   </div>
                   <div v-if="boardHighlightRows.length" class="board-highlights">
-                    <div v-for="(row, idx) in boardHighlightRows" :key="`pbh-${idx}`" class="board-highlight">
+                    <div v-for="(row, idx) in boardHighlightRows" :key="`bh-${idx}`" class="board-highlight">
                       <span class="quote-label">{{ row.label }}</span>
                       <span class="quote-value mono">{{ row.value }}</span>
                     </div>
@@ -580,7 +368,7 @@
                 <div v-if="extras?.news?.length" class="news-list">
                   <a
                     v-for="(item, idx) in extras.news"
-                    :key="`pn-${idx}`"
+                    :key="`n-${idx}`"
                     class="news-item"
                     :href="item.url"
                     target="_blank"
@@ -597,7 +385,12 @@
               </section>
             </div>
 
+            <!-- AI 面板 -->
             <div v-else class="drawer-body">
+              <div v-if="showAiGuideTip" class="ai-guide-banner">
+                <span>缠师在这里，按 A 可随时呼出</span>
+                <button class="ai-guide-dismiss" @click="dismissAiGuide">知道了</button>
+              </div>
               <div class="drawer-tabs">
                 <button class="drawer-tab" :class="{ active: drawerState.tabs.ai === 'chat' }" @click="setAiTab('chat')">缠师对话</button>
                 <button class="drawer-tab" :class="{ active: drawerState.tabs.ai === 'notes' }" @click="setAiTab('notes')">我的笔记</button>
@@ -608,7 +401,7 @@
               <StrategyCard v-else :signal="store.aiSignal" :loading="store.loadingAI" :updated-at="store.aiUpdatedAt" />
             </div>
           </aside>
-        </div>
+        </Transition>
       </div>
     </div>
   </div>
@@ -639,7 +432,6 @@ type AiTab = 'chat' | 'notes' | 'strategy'
 
 interface DrawerState {
   active: DrawerKey | null
-  pinned: DrawerKey[]
   tabs: {
     info: InfoTab
     ai: AiTab
@@ -664,9 +456,8 @@ const quote = ref<Quote | null>(null)
 const stockInfo = ref<StockInfoFields | null>(null)
 const extras = ref<StockExtras | null>(null)
 const showAiGuideTip = ref(false)
-const drawerStateRef = useStorage<DrawerState>('stock_view_drawers_v2', {
+const drawerStateRef = useStorage<DrawerState>('stock_view_drawers_v3', {
   active: null,
-  pinned: [],
   tabs: {
     info: 'depth',
     ai: 'chat',
@@ -675,21 +466,6 @@ const drawerStateRef = useStorage<DrawerState>('stock_view_drawers_v2', {
 })[0]
 
 const drawerState = computed(() => drawerStateRef.value)
-
-const drawerMeta: Record<DrawerKey, { title: string; subtitle: string }> = {
-  quote: {
-    title: '行情详情',
-    subtitle: '价格、级别、走势与缠论信号',
-  },
-  info: {
-    title: '盘口资讯',
-    subtitle: '盘口、资料、新闻同区切换',
-  },
-  ai: {
-    title: 'AI 诊股',
-    subtitle: '缠师对话、笔记与策略建议',
-  },
-}
 
 const stockCode = computed(() => route.params.code as string)
 const currentLevel = computed(() => store.currentLevel)
@@ -716,7 +492,6 @@ let datePanelClickHandler: ((e: MouseEvent) => void) | null = null
 function sanitizeDrawerState() {
   const validKeys: DrawerKey[] = ['quote', 'info', 'ai']
   const active = validKeys.includes(drawerStateRef.value.active as DrawerKey) ? drawerStateRef.value.active : null
-  const pinned = (drawerStateRef.value.pinned || []).filter((key): key is DrawerKey => validKeys.includes(key))
   const infoTab: InfoTab = ['depth', 'profile', 'news'].includes(drawerStateRef.value.tabs?.info as InfoTab)
     ? drawerStateRef.value.tabs.info
     : 'depth'
@@ -726,7 +501,6 @@ function sanitizeDrawerState() {
 
   drawerStateRef.value = {
     active,
-    pinned: Array.from(new Set(pinned)),
     tabs: {
       info: infoTab,
       ai: aiTab,
@@ -931,53 +705,14 @@ const boardHighlightRows = computed(() => {
   return list.filter(h => h.label !== '行业' && !/^行业/.test(h.label))
 })
 
-const pinnedDrawerKeys = computed(() => drawerState.value.pinned)
-const activeOverlayDrawer = computed(() => {
-  if (!drawerState.value.active) return null
-  return pinnedDrawerKeys.value.includes(drawerState.value.active) ? null : drawerState.value.active
-})
-
 const drawerAlertMap = computed<Record<DrawerKey, boolean>>(() => ({
   quote: sortedSignals.value.length > 0,
   info: !!extras.value?.news?.length,
   ai: !!store.aiSignal,
 }))
 
-function isDrawerVisible(key: DrawerKey) {
-  return pinnedDrawerKeys.value.includes(key) || drawerState.value.active === key
-}
-
-function isPinned(key: DrawerKey) {
-  return pinnedDrawerKeys.value.includes(key)
-}
-
 function toggleDrawer(key: DrawerKey) {
-  if (drawerStateRef.value.active === key && !isPinned(key)) {
-    drawerStateRef.value.active = null
-    return
-  }
-  drawerStateRef.value.active = key
-}
-
-function closeDrawer(key: DrawerKey) {
-  if (isPinned(key)) {
-    drawerStateRef.value.pinned = drawerStateRef.value.pinned.filter(item => item !== key)
-  }
-  if (drawerStateRef.value.active === key) {
-    drawerStateRef.value.active = null
-  }
-}
-
-function togglePin(key: DrawerKey) {
-  if (isPinned(key)) {
-    drawerStateRef.value.pinned = drawerStateRef.value.pinned.filter(item => item !== key)
-    drawerStateRef.value.active = key
-    return
-  }
-  drawerStateRef.value.pinned = [...drawerStateRef.value.pinned, key]
-  if (drawerStateRef.value.active === key) {
-    drawerStateRef.value.active = null
-  }
+  drawerStateRef.value.active = drawerStateRef.value.active === key ? null : key
 }
 
 function setInfoTab(tab: InfoTab) {
@@ -990,12 +725,6 @@ function setAiTab(tab: AiTab) {
 
 function dismissAiGuide() {
   showAiGuideTip.value = false
-}
-
-function handleChartShellClick() {
-  if (activeOverlayDrawer.value) {
-    drawerStateRef.value.active = null
-  }
 }
 
 function fmtDepthPrice(p: number) {
@@ -1087,11 +816,6 @@ async function toggleWatch() {
   }
 }
 
-async function switchModel(model: string) {
-  if (model === store.aiModel) return
-  await store.setAiModel(model, stockCode.value)
-  await store.loadAll(stockCode.value, store.currentLevel, startDate.value || undefined, endDate.value || undefined)
-}
 
 function handleKeydown(e: KeyboardEvent) {
   const target = e.target as HTMLElement | null
@@ -1133,7 +857,7 @@ function handleKeydown(e: KeyboardEvent) {
       toggleDrawer('ai')
       break
     case 'Escape':
-      if (activeOverlayDrawer.value) drawerStateRef.value.active = null
+      if (drawerStateRef.value.active) drawerStateRef.value.active = null
       break
   }
 }
@@ -1336,96 +1060,6 @@ watch(() => route.params.code, () => {
   flex-wrap: nowrap;
 }
 
-.drawer-trigger-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.drawer-trigger-wrap {
-  position: relative;
-}
-
-.drawer-trigger {
-  position: relative;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-secondary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.drawer-trigger:hover {
-  color: var(--text-primary);
-  border-color: rgba(16, 185, 129, 0.55);
-  background: rgba(16, 185, 129, 0.08);
-}
-
-.drawer-trigger.active {
-  color: #6ee7b7;
-  border-color: rgba(16, 185, 129, 0.6);
-  background: rgba(16, 185, 129, 0.12);
-  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.12) inset;
-}
-
-.trigger-dot {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ef4444;
-  border: 2px solid var(--bg-base);
-}
-
-.guide-bubble {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: -8px;
-  width: 220px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  background: rgba(9, 15, 22, 0.96);
-  color: var(--text-secondary);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 0.74rem;
-  line-height: 1.5;
-  z-index: 20;
-  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
-}
-
-.guide-bubble::before {
-  content: '';
-  position: absolute;
-  top: -6px;
-  right: 16px;
-  width: 10px;
-  height: 10px;
-  transform: rotate(45deg);
-  background: rgba(9, 15, 22, 0.96);
-  border-left: 1px solid rgba(16, 185, 129, 0.35);
-  border-top: 1px solid rgba(16, 185, 129, 0.35);
-}
-
-.guide-close {
-  align-self: flex-end;
-  border: none;
-  background: transparent;
-  color: #6ee7b7;
-  font-size: 0.72rem;
-  cursor: pointer;
-}
-
 .loading-overlay {
   position: fixed;
   inset: 0;
@@ -1574,14 +1208,7 @@ watch(() => route.params.code, () => {
 }
 
 .drawer-dock {
-  display: flex;
-  gap: 16px;
-  align-items: stretch;
-  flex-shrink: 0;
-}
-
-.drawer-panel {
-  width: min(440px, calc(100vw - 48px));
+  width: min(280px, calc(100vw - 48px));
   background: rgba(16, 22, 31, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
@@ -1589,58 +1216,125 @@ watch(() => route.params.code, () => {
   display: flex;
   flex-direction: column;
   min-height: 0;
-}
-
-.drawer-panel--overlay {
-  position: absolute;
-  top: 56px;
-  right: 0;
-  bottom: 0;
-  z-index: 15;
-}
-
-.drawer-panel--pinned {
-  height: 100%;
   max-height: calc(100vh - 112px);
+  flex-shrink: 0;
+  align-self: stretch;
 }
 
-.drawer-overlay-enter-active,
-.drawer-overlay-leave-active {
+/* Switch 选项卡栏 */
+.drawer-switch {
+  display: flex;
+  gap: 0;
+  padding: 5px;
+  margin: 8px 8px 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  align-items: center;
+}
+
+.drawer-switch-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.drawer-switch-btn:hover {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.drawer-switch-btn.active {
+  color: var(--text-primary);
+  background: rgba(16, 185, 129, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.16);
+}
+
+.drawer-close-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: all 0.16s ease;
+}
+
+.drawer-close-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.switch-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+/* AI 引导提示条 */
+.ai-guide-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.ai-guide-dismiss {
+  border: none;
+  background: transparent;
+  color: #6ee7b7;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.ai-guide-dismiss:hover {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+/* 侧栏划入动画 */
+.drawer-slide-enter-active,
+.drawer-slide-leave-active {
   transition: transform 0.22s ease, opacity 0.22s ease;
 }
 
-.drawer-overlay-enter-from,
-.drawer-overlay-leave-to {
+.drawer-slide-enter-from,
+.drawer-slide-leave-to {
   transform: translateX(24px);
   opacity: 0;
-}
-
-.drawer-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 16px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.drawer-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--text-primary);
-}
-
-.drawer-subtitle {
-  margin: 4px 0 0;
-  font-size: 0.74rem;
-  color: var(--text-muted);
-}
-
-.drawer-head-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .drawer-icon-btn {
@@ -1668,7 +1362,7 @@ watch(() => route.params.code, () => {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 14px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -2183,18 +1877,7 @@ watch(() => route.params.code, () => {
 
   .drawer-dock {
     width: 100%;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .drawer-panel--pinned {
-    min-width: 380px;
-    height: auto;
     max-height: none;
-  }
-
-  .drawer-panel--overlay {
-    width: min(400px, calc(100vw - 40px));
   }
 
   .nav-inner--stock {
@@ -2238,19 +1921,6 @@ watch(() => route.params.code, () => {
 
   .chart-actions {
     margin-left: 0;
-  }
-
-  .drawer-panel--overlay {
-    position: fixed;
-    top: 88px;
-    right: 12px;
-    left: 12px;
-    bottom: 12px;
-    width: auto;
-  }
-
-  .drawer-panel--pinned {
-    min-width: min(380px, calc(100vw - 24px));
   }
 }
 </style>
